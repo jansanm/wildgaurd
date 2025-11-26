@@ -1,0 +1,8 @@
+ultralytics==8.0.228
+gradio==4.41.1
+opencv-python-headless
+pillow
+numpy
+torch>=2.0.0
+torchvision
+pydantic
