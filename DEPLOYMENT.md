@@ -26,71 +26,26 @@ Expected output:
 - End-to-end integration: Successful
 
 ### Step 3: Launch Interface
-\`\`\`bash
+```bash
 python wildguard_detector.py
-\`\`\`
+```
 
 Access at: http://localhost:7860
-
-## Vercel Deployment
-
-### Prerequisites
-- Vercel account (free tier works)
-- GitHub repository
-- Python runtime support
-
-### Step 1: Prepare for Deployment
-\`\`\`bash
-# Create requirements.txt
-pip freeze > requirements.txt
-
-# Create Vercel config
-touch vercel.json
-\`\`\`
-
-### Step 2: Vercel Configuration
-Create \`vercel.json\`:
-\`\`\`json
-{
-  "buildCommand": "pip install -r requirements.txt",
-  "outputDirectory": ".",
-  "regions": ["iad1"],
-  "env": {
-    "GRADIO_SERVER_NAME": "0.0.0.0",
-    "GRADIO_SERVER_PORT": "8000"
-  }
-}
-\`\`\`
-
-### Step 3: Push to GitHub
-\`\`\`bash
-git init
-git add .
-git commit -m "WildGuard deployment"
-git push origin main
-\`\`\`
-
-### Step 4: Deploy on Vercel
-1. Go to https://vercel.com
-2. Click "New Project"
-3. Import your GitHub repository
-4. Vercel auto-detects Python
-5. Deploy
 
 ## Docker Deployment
 
 ### Step 1: Create Dockerfile
-\`\`\`dockerfile
+```dockerfile
 FROM python:3.10-slim
 
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \\
-    libgl1-mesa-glx \\
-    libsm6 \\
-    libxext6 \\
-    libxrender-dev \\
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy files
@@ -104,16 +59,16 @@ EXPOSE 7860
 
 # Run application
 CMD ["python", "wildguard_detector.py"]
-\`\`\`
+```
 
 ### Step 2: Build & Run
-\`\`\`bash
+```bash
 # Build image
 docker build -t wildguard:latest .
 
 # Run container
 docker run -p 7860:7860 wildguard:latest
-\`\`\`
+```
 
 Access at: http://localhost:7860
 
@@ -127,17 +82,17 @@ Access at: http://localhost:7860
 
 ### Option 2: AWS Lambda
 Uses Gradio's built-in deployment:
-\`\`\`python
+```python
 # In wildguard_detector.py
 interface.launch(
     share=True,
     server_name="0.0.0.0",
     server_port=8000
 )
-\`\`\`
+```
 
 ### Option 3: Google Cloud Run
-\`\`\`bash
+```bash
 # Create app.yaml
 runtime: python310
 env: standard
@@ -145,13 +100,13 @@ entrypoint: python wildguard_detector.py
 
 # Deploy
 gcloud app deploy
-\`\`\`
+```
 
 ## Environment Variables
 
 Set these for production:
 
-\`\`\`bash
+```bash
 # Gradio config
 GRADIO_SERVER_NAME=0.0.0.0
 GRADIO_SERVER_PORT=7860
@@ -160,12 +115,12 @@ GRADIO_SHARE=False  # Disable share link in production
 # Performance
 OMP_NUM_THREADS=4
 CUDA_VISIBLE_DEVICES=0  # GPU support if available
-\`\`\`
+```
 
 ## Performance Optimization
 
 ### For Production
-\`\`\`python
+```python
 # In wildguard_detector.py
 interface.launch(
     share=False,  # Disable sharing
@@ -175,20 +130,20 @@ interface.launch(
     max_threads=4,
     auth=[("admin", "password")]  # Add auth
 )
-\`\`\`
+```
 
 ### GPU Acceleration
-\`\`\`bash
+```bash
 # Install GPU support
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 # YOLOv8 will auto-detect GPU
-\`\`\`
+```
 
 ## Monitoring & Logging
 
 ### Setup Logging
-\`\`\`python
+```python
 import logging
 
 logging.basicConfig(
@@ -200,14 +155,14 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
-\`\`\`
+```
 
 ### Health Check Endpoint
-\`\`\`python
+```python
 @app.route('/health', methods=['GET'])
 def health_check():
     return {'status': 'healthy'}, 200
-\`\`\`
+```
 
 ## Security Considerations
 
@@ -241,25 +196,22 @@ def health_check():
 
 ## Testing Deployed Version
 
-\`\`\`bash
+```bash
 # Load test
 while true; do
-  curl -X POST http://localhost:7860/api/predict \\
-    -H "Content-Type: application/json" \\
+  curl -X POST http://localhost:7860/api/predict \
+    -H "Content-Type: application/json" \
     -d '{"image": "...base64..."}' 
   sleep 1
 done
-\`\`\`
+```
 
 ## Rollback Procedure
 
-\`\`\`bash
-# Vercel rollback
-vercel rollback
-
+```bash
 # Docker rollback
 docker run -p 7860:7860 wildguard:previous
-\`\`\`
+```
 
 ## Maintenance
 
