@@ -21,39 +21,35 @@ print("🚀 Initializing WildGuard System...")
 class WildGuardDetector:
     def __init__(self):
         print("📥 Loading YOLOv8 model...")
-        self.model = YOLO('yolov8n.pt')
-        # COCO dataset animal classes
-        self.animal_classes = {
-            14: 'dog', 15: 'cat', 16: 'bird', 17: 'horse',
-            18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear',
-            22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella'
-        }
+        # Upgraded to Medium model for better accuracy
+        self.model = YOLO('yolov8m.pt')
         print("✅ Model loaded successfully!")
     
     def detect(self, image):
         """
-        Fixed bounding box extraction logic - properly unpacks coordinates
+        Detects all objects in the image using YOLOv8
         """
         try:
             results = self.model(image, conf=0.25, verbose=False)
             detections = []
             
             if results and len(results) > 0:
-                result = results[0]  # Get first result properly
+                result = results[0]
                 if result.boxes is not None and len(result.boxes) > 0:
                     for box in result.boxes:
                         xyxy = box.xyxy[0].cpu().numpy()
                         x1, y1, x2, y2 = float(xyxy[0]), float(xyxy[1]), float(xyxy[2]), float(xyxy[3])
                         conf = float(box.conf.cpu().numpy()[0])
                         cls = int(box.cls.cpu().numpy()[0])
+                        class_name = result.names[cls]
                         
-                        if cls in self.animal_classes:
-                            detections.append({
-                                'bbox': [int(x1), int(y1), int(x2), int(y2)],
-                                'class': self.animal_classes[cls],
-                                'confidence': conf,
-                                'class_id': cls
-                            })
+                        # No filtering - return all detections
+                        detections.append({
+                            'bbox': [int(x1), int(y1), int(x2), int(y2)],
+                            'class': class_name,
+                            'confidence': conf,
+                            'class_id': cls
+                        })
             
             return detections
         except Exception as e:
